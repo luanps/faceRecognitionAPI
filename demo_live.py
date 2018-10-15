@@ -8,16 +8,18 @@ NUMFRAMES = 5
 parse = argparse.ArgumentParser()
 parse.add_argument('empresa',type=int,
     help='1 - Dev | 2- ABL | 3-Detran')
+parse.add_argument('3d',type=int,
+    help='0: 2D | 1:3D')
 '''parse.add_argument('modo',type=str,
     help='C - cadastro | V - verificação')
 parse.add_argument('-chave',type=str,
     help='-chave : chave de cadastro ex: nome, cpf')'''
 args = parse.parse_args()
-
 cap = cv2.VideoCapture(0)
          
 count = 0
 bb=0
+
 while cap.isOpened():
     ret,frame = cap.read()
 
