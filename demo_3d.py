@@ -43,44 +43,78 @@ def convert_z16_to_bgr(frame):
     rgb_frame[zeros, 2] = 0
     return rgb_frame
 
-def if3dFace(depth,ir,b):
+def if3dFace(depth,ir,bb):
+
+    #reduz tamanho BB face 
     b = [0,0,0,0]
-    b[0]  = int(bb[0]*1.01)
-    b[1]  = int(bb[1]*1.01)
-    b[2]  = int(bb[2]*.99)
-    b[3]  = int(bb[3]*.99)
-    '''
-    dR = depth[b[0]:b[2],b[1]:b[3]]
+    b[0]  = int(bb[0]*1.05)
+    b[1]  = int(bb[1]*1.05)
+    b[2]  = int(bb[2]*.9)
+    b[3]  = int(bb[3]*.9)
+    center = [ int((b[2]-b[0])/2 + b[0]) , int((b[3]-b[1])/2 + b[1])]
+   
+    pt1 = [float(x) for x in depth[b[0],b[1],]]
+    pt2 = [float(x) for x in depth[b[2],b[1],]]
+    pt3 = [float(x) for x in depth[b[0],b[3],]]
+    pt4 = [float(x) for x in depth[b[2],b[3],]]
+    '''cv2.putText(depth,'0',(b[0],b[1]),cv2.FONT_HERSHEY_DUPLEX,1,(0,200,0),1)
+    cv2.putText(depth,'1',(b[2],b[1]),cv2.FONT_HERSHEY_DUPLEX,1,(0,200,0),1)
+    cv2.putText(depth,'2',(b[0],b[3]),cv2.FONT_HERSHEY_DUPLEX,1,(0,200,0),1)
+    cv2.putText(depth,'3',(b[2],b[3]),cv2.FONT_HERSHEY_DUPLEX,1,(0,200,0),1)
+    cv2.putText(depth,'4',(center[0],center[1]),cv2.FONT_HERSHEY_DUPLEX,1,(0,200,0),1)'''
+
+    center = [float(x) for x in depth[center[0],center[1]]]
+    dif = [pt1,pt2,pt3,pt4,center]
+    a,maxx = max(list(zip(dif, range(len(dif)))))
+    a,minn = min(list(zip(dif, range(len(dif)))))
+    #zeros = [20.0,5.0,0.0]
+    zeros = [0.0,0.0,0.0]
+    if (zeros == dif[0] == dif[1] == dif[2] ==dif[3] or minn!=4): 
+        #dif[-1] == dif[0] or dif[-1] ==dif[1] or dif[-1] == dif[2]):
+        return (0,b)
+
+    print(pt1,pt2,pt3,pt4,center)
+
+    #norm 
+    '''dR = depth[b[0]:b[2],b[1]:b[3]]
     dRn= np.zeros((dR.shape))
     dRn[:,:,0] = normalize(dR[:,:,0])
     dRn[:,:,1] = normalize(dR[:,:,1])
     dRn[:,:,2] = normalize(dR[:,:,2])
-    tmp= np.zeros((dR.shape))'''
-    y = np.random.random_integers(low=b[0],high=min(b[2],640),size=1)
-    x = np.random.random_integers(low=b[1],high=min(b[3],480),size=1)
-    diff = []
-    for i in range(0,len(x)):
-        diff = (depth[x[i],y[i],:] - diff)
-    print(diff)
-    #print(np.mean(diff),np.std(diff),np.linalg.norm(diff))
-    '''l1 = np.linalg.norm(dRn[:,:,0])
+    l1 = np.linalg.norm(dRn[:,:,0])
     l2 = np.linalg.norm(dRn[:,:,1])
-    l3 = np.linalg.norm(dRn[:,:,2])'''
-    #lb = 'dp: %.1f '%(dRn-tmp)
-    #cv2.putText(depth,lb,(20,50),cv2.FONT_HERSHEY_DUPLEX,1,(0,200,0),1)
+    l3 = np.linalg.norm(dRn[:,:,2])
+    lb = ' %.1f %.1f %.1f'%(l1,l2,l3)
+    cv2.putText(depth,lb,(20,50),cv2.FONT_HERSHEY_DUPLEX,1,(0,200,0),1)'''
 
-    cv2.rectangle(depth,(b[0],b[1]),(b[2],b[3]),(0,200,0),2) 
-    return depth
+    #n pixels random dentro da face
+    '''y = np.random.random_integers(low=b[0],high=min(b[2],640),size=10)
+    x = np.random.random_integers(low=b[1],high=min(b[3],480),size=10)
+    diff = [0,0,0]
+    for i in range(0,len(x)):
+        diff = abs(depth[x[i],y[i],:] - diff)
+        for j in depth[x[i],y[i],:]:
+            if j > 200:
+                cv2.rectangle(depth,(b[0],b[1]),(b[2],b[3]),(0,0,200),2) 
+                return depth'''
+                
+    
+
+    return (1,b)
+
+
 with pyrs.Service() as serv:
     with serv.Device() as dev:
 
         dev.apply_ivcam_preset(0)
         
         try:  # set custom gain/exposure values to obtain good depth image
-            custom_options = [(rs_option.RS_OPTION_R200_LR_EXPOSURE, 30.0),
-                              (rs_option.RS_OPTION_R200_LR_GAIN, 100.0)]
+            '''custom_options = [(rs_option.RS_OPTION_R200_LR_EXPOSURE, 30.0),
+                              (rs_option.RS_OPTION_R200_LR_GAIN, 100.0),
+                              (rs_option.RS_OPTION_F200_LASER_POWER, 12)]'''
 
-            custom = [(rs_option.RS_OPTION_COLOR_BACKLIGHT_COMPENSATION,1),
+            #novas configs - desabilitado
+            custom_options = [(rs_option.RS_OPTION_COLOR_BACKLIGHT_COMPENSATION,1),
                 (rs_option.RS_OPTION_COLOR_BRIGHTNESS,55),
                 (rs_option.RS_OPTION_COLOR_CONTRAST, 32),
                 (rs_option.RS_OPTION_COLOR_ENABLE_AUTO_EXPOSURE,167),
@@ -90,10 +124,10 @@ with pyrs.Service() as serv:
                 (rs_option.RS_OPTION_COLOR_SATURATION, 128),
                 (rs_option.RS_OPTION_COLOR_SHARPNESS,0),
                 (rs_option.RS_OPTION_COLOR_WHITE_BALANCE, 3200),
-                (rs_option.RS_OPTION_F200_ACCURACY, 13),
-                (rs_option.RS_OPTION_F200_MOTION_RANGE, 14),
-                (rs_option.RS_OPTION_F200_FILTER_OPTION, 15),
-                (rs_option.RS_OPTION_F200_CONFIDENCE_THRESHOLD, 16),
+                (rs_option.RS_OPTION_F200_ACCURACY, 1),
+                (rs_option.RS_OPTION_F200_MOTION_RANGE, 10),
+                (rs_option.RS_OPTION_F200_FILTER_OPTION, 5),
+                (rs_option.RS_OPTION_F200_CONFIDENCE_THRESHOLD, 1),
                 (rs_option.RS_OPTION_F200_LASER_POWER, 12)]
 
             dev.set_device_options(*zip(*custom_options))
@@ -105,7 +139,7 @@ with pyrs.Service() as serv:
         smoothing = 0.9
         fps_smooth = 30
         bb = 0
-
+        is3d = 0
         while True:
  
             dev.wait_for_frames()
@@ -114,18 +148,25 @@ with pyrs.Service() as serv:
 
             if bb:
                 cv2.rectangle(c,(bb[0],bb[1]),(bb[2],bb[3]),(0,200,0),2) 
-                cv2.putText(c,'%s'%chave,(bb[0],bb[1]),cv2.FONT_HERSHEY_DUPLEX,2,(0,200,0),2)
-
+                cv2.putText(c,'%s'%chave,(bb[0],bb[1]),cv2.FONT_HERSHEY_DUPLEX,2,(100,200,0),2)
 
             if args.depth:
                 d = dev.depth# * dev.depth_scale * 1000
+                pc = dev.pointcloud 
                 d = convert_z16_to_bgr(d)
+                
+                
                 #d = cv2.applyColorMap(d.astype(np.uint8), cv2.COLORMAP_RAINBOW)
                 if bb:
                     try:
-                        d = if3dFace(d,i,bb)
+                        is3d,b = if3dFace(pc,i,bb)
+                        if is3d:
+                            cv2.rectangle(d,(b[0],b[1]),(b[2],b[3]),(0,200,0),2) 
+                            cv2.putText(d,'%s'%chave,(b[0],b[1]),cv2.FONT_HERSHEY_DUPLEX,2,(100,200,0),2)
+    
                     except:
                         pass
+                        
                 i = dev.infrared
                 i = i.reshape(i.shape[0],i.shape[1],1)
                 i = cv2.cvtColor(i.astype(np.uint8),cv2.COLOR_GRAY2BGR)
@@ -135,7 +176,7 @@ with pyrs.Service() as serv:
                 cv2.imshow('', c)
 
             cnt += 1
-            if (cnt % NUMFRAMES) == 0:
+            if (cnt % NUMFRAMES) == 0 and cnt >50:
                 now = time.time()
                 dt = now - last
                 fps = NUMFRAMES/dt
