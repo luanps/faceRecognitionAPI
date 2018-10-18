@@ -4,29 +4,41 @@ from os import listdir
 from os.path import isfile,join,abspath
 
 class Request:
-    def __init__(self,imageName,img,appCode):
+    def __init__(self,rn,company,log,device,app,lat,lon,keyPerson,attr,
+        imgType,trueImage,truePC,img,pc,free):
 
-        self.requestNumber = None 
-        self.logCode = None
-        self.captureDeviceCode = None
-        self.appCode = appCode
-        self.latitude = None
-        self.longitude = None
-        self.attrCode = None
-        self.typeImage = 1
-        self.trueImage = None
-        self.truePictureTree = None
-        self.imageValidate = img	
+        self.requestNumber = rn
+        self.companyCode = company
+        self.logCode = log
+        self.captureDeviceCode = device
+        self.appCode = app #tipo de solicitacao
+        self.latitude = lat
+        self.longitude = lon
+        self.keyPerson = keyPerson
+        self.attrCode = attr
+        self.typeImage = imgType
+        self.trueImage = trueImage
+        self.truePictureTree = truePC
+        self.imageValidate = img
+        self.validatePictureTree = pc
+        self.free = free
 
-        self.imageName = imageName
-        self.companyCode,self.keyPerson,self.seqPerson = self.imageName.split('-')
-        self.seqPerson = self.seqPerson.split('.')[0]
+        #self.imageName = imgName
+        #self.companyCode,self.keyPerson,self.seqPerson = self.imageName.split('-')
+        #self.seqPerson = self.seqPerson.split('.')[0]
 
-        #out of service
-        self.sexo = None
-        self.dtNascimento = None
-        self.dtCaptura = None
-    
+   def isLat(self.lat):
+       try:
+           if self.lat < 90 and self.lat> -90:
+               return 1
+       except:
+        return 0
 
+   def isLon(self.lon):
+        try:
+            if self.lon < 180 and self.lon > -180:
+                return 1
+        except:
+            return 0 
 
 
