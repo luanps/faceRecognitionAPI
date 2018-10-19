@@ -18,8 +18,8 @@ def requestService(imgName,img,appCode,imgType):
     #log number random
     log = random.randint(1,1000000)
 
-    #device de testes 123
-    #device de testes DETRAN
+    #device de testes = 123 (insere empresa 1 )
+    #device de testes DETRAN = 1 (insere empresa 3)
     device = 1
 
     #coordenadas imago

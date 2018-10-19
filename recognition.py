@@ -92,10 +92,9 @@ def verify(data):
         POW(tpl117-%s,2) + POW(tpl118-%s,2) + POW(tpl119-%s,2) + POW(tpl120-%s,2) + 
         POW(tpl121-%s,2) + POW(tpl122-%s,2) + POW(tpl123-%s,2) + POW(tpl124-%s,2) + 
         POW(tpl125-%s,2) + POW(tpl126-%s,2) + POW(tpl127-%s,2) + POW(tpl128-%s,2) 
-        AS square_dist from pessoa_empresa,pessoa,pessoa_template
+        AS square_dist from pessoa_empresa,pessoa
         where pessoa.id=pessoa_empresa.id_pessoa 
-        AND  pessoa.id_pessoa_template = pessoa_template.id AND 
-        pessoa_empresa.id_empresa=%s %s %s %s """
+        AND pessoa_empresa.id_empresa=%s %s %s %s """
         %(float(feat[0]),
         float(feat[1]), float(feat[2]), float(feat[3]), float(feat[4]),
         float(feat[5]), float(feat[6]), float(feat[7]), float(feat[8]),
@@ -135,7 +134,10 @@ def verify(data):
     if resQuery:
         if resQuery[0][-1] < THRESH:
             #return (resQuery[0],feat,bb,shape)
-            return (resQuery[1]) #retorna id 
+            data.idPerson = resQuery[0][1] 
+            return (data.idPerson) #retorna pessoa.id 
+
+    #pessoa nao encontrada
     return 0
     
 
@@ -181,7 +183,7 @@ def register(data):
     conn[1].execute("""insert into pessoa_empresa (id_empresa,id_pessoa,chave)
          values (%s,%s,%s); """,(int(data.companyCode),idPerson,str(data.keyPerson)))'''
 
-    #conn[0].commit() #salva alteracoes no bd
+    conn[0].commit() #salva alteracoes no bd
     return data.idPerson
 
     #lastId = conn[1].lastrowid #ultimo id consultado pelo conn
@@ -223,6 +225,7 @@ def genLog(data):
     img = toBase64(data.imageValidate)
     conn[1].execute("""insert into pessoa_log (id_pessoa,dt_log,id_dispositivo,latitude,longitude,foto)
          values (%s,%s,%s,%s,%s,%s)""",(data.idPerson,dt,data.captureDeviceCode,data.latitude,data.longitude,img))
+    conn[0].commit() #salva alteracoes no bd
     return
 
 #cod 1 verifica pessoa na base da empresa, retorna codigo dela
@@ -237,7 +240,6 @@ def runRecognition(d):
     # verifica se empresa esta cadastrada 
     if not isCustomer(d):
         return 5005 #5002?
-
     #verifica se dispositivo existe FALTA TESTAR
     if not isDevice(d):
         return 5012
@@ -272,10 +274,12 @@ def runRecognition(d):
         else:
             #pessoa encontrada
             status = 1
-                
+
     #verifica 1-n na base da empresa E cadastra
     elif d.appCode == 2:
+
         resultQuery =  verify(d)
+        #imagem incompativel (sem deteccao face)
         if resultQuery == -1:
             return 5009
         #pessoa nao encontrada 
@@ -296,18 +300,18 @@ def runRecognition(d):
         if resultQuery == -1:
             return 5009
         status = 6
-    
-    if status < 5000:
+
+    #insere na tabela pessoa_log se cadastro for realizado ou pessoa encontrada 
+    if status < 5000 and resultQuery>0:
         genLog(d)
 
-    
     return ([status,resultQuery]) 
 
 def main(data):
     global conn
     conn = connectDB()
     status = runRecognition(data)
-    if len(status)>1:
+    if len(status)>1 and status[1]>0:
         jsFile = json.dumps(Return(data.requestNumber,status[0],status[1]).__dict__)
     else:
         jsFile = json.dumps(Return(data.requestNumber,status[0],999999999).__dict__)
