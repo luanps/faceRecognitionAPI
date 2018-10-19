@@ -211,7 +211,7 @@ def isDevice(data):
     if (int(data.captureDeviceCode) not in [x[0] for x in getData]):
         return 5002 #revisar este codigo de erro
 
-    return 1
+    return 0
 
 def isAppCode(data):
     if data.appCode in range(1,4):
@@ -239,19 +239,21 @@ def runRecognition(d):
 
     # verifica se empresa esta cadastrada 
     if not isCustomer(d):
-        return 5005 #5002?
+        return 5005,-1 #5002?
     #verifica se dispositivo existe FALTA TESTAR
-    if not isDevice(d):
-        return 5012
+    
+    device = isDevice(d)
+    if device:
+        return device,-1
     #verifica cod solicitacao
     if not isAppCode(d):
-        return  5001
+        return  5001,-1
     
     if not d.isLongitude():
-        return  5013
+        return  5013,-1
 
     if not d.isLatitude():
-        return 5014
+        return 5014,-1
    
     #verifica e converte base64 para imagem 
     #falta testar
@@ -259,7 +261,7 @@ def runRecognition(d):
         try:
             d.imageValidate = toImage(d.imageValidate)
         except:
-            return 5009 
+            return 5009,-1
              
     #verifica 1-n na base da empresa
     if d.appCode == 1:
@@ -267,7 +269,7 @@ def runRecognition(d):
         resultQuery = verify(d)
         #imagem incompativel (sem deteccao face)
         if resultQuery ==-1:
-            return 5009
+            return 5009,-1
         #pessoa nao encontrada 
         if not resultQuery:
             status = 3
@@ -281,13 +283,13 @@ def runRecognition(d):
         resultQuery =  verify(d)
         #imagem incompativel (sem deteccao face)
         if resultQuery == -1:
-            return 5009
+            return 5009,-1
         #pessoa nao encontrada 
         if not resultQuery:
             #insere no bd
             resultQuery = register(d)
             if resultQuery == -1:
-                return 5009
+                return 5009,-1
             status = 6
 
         #pessoa encontrada, nao insere
@@ -298,7 +300,7 @@ def runRecognition(d):
     elif d.appCode == 3:
         resultQuery = register(d)
         if resultQuery == -1:
-            return 5009
+            return 5009,-1
         status = 6
 
     #insere na tabela pessoa_log se cadastro for realizado ou pessoa encontrada 
