@@ -10,6 +10,8 @@ import mysql.connector
 import base64
 import codecs
 import time
+import json
+from returnFile import Return
 predictor = 'model2.dat'
 face_rec = 'model1.dat'
 detector = dlib.get_frontal_face_detector()
@@ -55,7 +57,7 @@ def verify(data):
     try:
         feat,bb,shape = extractFeatures(data.imageValidate)
     except BaseException:
-       return 5009
+       return -1
     #recupera dados da base e compara
     conn[1].execute( """ select chave,pessoa.id, 
         POW(tpl001-%s,2) + POW(tpl002-%s,2) + POW(tpl003-%s,2) + POW(tpl004-%s,2) + 
@@ -133,7 +135,7 @@ def verify(data):
     if resQuery:
         if resQuery[0][-1] < THRESH:
             #return (resQuery[0],feat,bb,shape)
-            return (resQuery)
+            return (resQuery[1]) #retorna id 
     return 0
     
 
@@ -149,10 +151,10 @@ def register(data):
     try:
         feat,bb,shape = extractFeatures(data.imageValidate)
     except BaseException:
-       return 5009
+       return -1
 
-    idPerson = lastid('pessoa')
-    conn[1].execute("""insert into pessoa (id) values (%s)""",(idPerson,))
+    data.idPerson = lastid('pessoa')
+    conn[1].execute("""insert into pessoa (id) values (%s)""",(data.idPerson,))
 
     '''conn[1].execute("""insert into pessoa_atributo (id_pessoa,dt_captura,id_dispositivo,
         latitude,longitude) values (%s,%s,%s,%s,%s)""",(idPerson,getDatetime,data.captureDeviceCode,
@@ -161,16 +163,16 @@ def register(data):
     dt = str(time.strftime('%Y-%m-%d %H:%M:%S'))
     conn[1].execute("""insert into pessoa_empresa (id_empresa,id_pessoa,chave,dt_criou, id_dispositivo,
         latitude_criou,longitude_criou) values (%s,%s,%s,%s,%s,%s,%s)""", (int(data.companyCode),
-        idPerson,str(data.keyPerson),dt,data.captureDeviceCode,data.latitude, data.longitude))
+        data.idPerson,str(data.keyPerson),dt,data.captureDeviceCode,data.latitude, data.longitude))
 
     for i in range(1,129):
         conn[1].execute("""update pessoa set tpl{:03} = %s where id=%s; """.format(i)
-            %(feat[i-1],idPerson))
+            %(feat[i-1],data.idPerson))
 
     '''for i in range(1,129):
         if i==1:
             conn[1].execute("""insert into pessoa_template (id,f%d) values (%s,%s);"""
-                %(i,idPersonTemplate,feat[i-1]))
+                %(i,data.idPersonTemplate,feat[i-1]))
         else:
             conn[1].execute("""update pessoa_template set f%d = %s where id=%s; """
                 %(i,feat[i-1],idPersonTemplate))
@@ -180,7 +182,7 @@ def register(data):
          values (%s,%s,%s); """,(int(data.companyCode),idPerson,str(data.keyPerson)))'''
 
     #conn[0].commit() #salva alteracoes no bd
-    return 0
+    return data.idPerson
 
     #lastId = conn[1].lastrowid #ultimo id consultado pelo conn
 
@@ -214,18 +216,21 @@ def isAppCode(data):
         return 1
     return 0
 
+
+#insere dados na tabela pessoa_log
+def genLog(data):
+    dt = str(time.strftime('%Y-%m-%d %H:%M:%S'))
+    img = toBase64(data.imageValidate)
+    conn[1].execute("""insert into pessoa_log (id_pessoa,dt_log,id_dispositivo,latitude,longitude,foto)
+         values (%s,%s,%s,%s,%s,%s)""",(data.idPerson,dt,data.captureDeviceCode,data.latitude,data.longitude,img))
+    return
+
 #cod 1 verifica pessoa na base da empresa, retorna codigo dela
 #cod 2 verifica pessoa na base da empresa, se nao existir CADASTRE
 #cod 3 cadastre pessoa na base da empresa
 
-def genLog(data):
-    #pessoa.id,companyCode,dataHora,logCode,deviceCode,lat,lon
-    return
-def main(d):
-    global conn
-    conn = connectDB()
+def runRecognition(d):
     status = 0
-    result = 0
     #OBS.: falta validar o codigo do log aqui
 
 
@@ -256,40 +261,57 @@ def main(d):
              
     #verifica 1-n na base da empresa
     if d.appCode == 1:
-        result = verify(d)
+
+        resultQuery = verify(d)
+        #imagem incompativel (sem deteccao face)
+        if resultQuery ==-1:
+            return 5009
         #pessoa nao encontrada 
-        if not result:
+        if not resultQuery:
             status = 3
         else:
-            #imagem incompativel (sem deteccao face)
-            if result > 5000:
-                return result
-            else:
-                #pessoa encontrada
-                status = 1
+            #pessoa encontrada
+            status = 1
                 
     #verifica 1-n na base da empresa E cadastra
     elif d.appCode == 2:
-        result =  verify(d)
-        if not result:
-            result.append(register(d))
+        resultQuery =  verify(d)
+        if resultQuery == -1:
+            return 5009
+        #pessoa nao encontrada 
+        if not resultQuery:
+            #insere no bd
+            resultQuery = register(d)
+            if resultQuery == -1:
+                return 5009
+            status = 6
+
+        #pessoa encontrada, nao insere
         else:
-            result.append(verifyPerson)
+            status = 1
 
     #cadastra na base da empresa
     elif d.appCode == 3:
-        result = register(d)
-        if not result:
-            status = 6
-        else:
-            return result
+        resultQuery = register(d)
+        if resultQuery == -1:
+            return 5009
+        status = 6
+    
+    if status < 5000:
+        genLog(d)
 
-    #if result > 5000:
-    #    status = result
+    
+    return ([status,resultQuery]) 
 
-    #retorno:
+def main(data):
+    global conn
+    conn = connectDB()
+    status = runRecognition(data)
+    if len(status)>1:
+        jsFile = json.dumps(Return(data.requestNumber,status[0],status[1]).__dict__)
+    else:
+        jsFile = json.dumps(Return(data.requestNumber,status[0],999999999).__dict__)
     #d.requestNumber , status, pessoa.id (senao retorna '999999999'
-
     conn[1].close()
     conn[0].close()
-    return result 
+    return jsFile
