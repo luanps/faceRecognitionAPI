@@ -9,6 +9,7 @@ import _pickle as cPickle
 import mysql.connector
 import base64
 import codecs
+import time
 predictor = 'model2.dat'
 face_rec = 'model1.dat'
 detector = dlib.get_frontal_face_detector()
@@ -54,41 +55,41 @@ def verify(data):
     try:
         feat,bb,shape = extractFeatures(data.imageValidate)
     except BaseException:
-       return 0
+       return 5009
     #recupera dados da base e compara
     conn[1].execute( """ select chave,pessoa.id, 
-        POW(f1-%s,2) + POW(f2-%s,2) + POW(f3-%s,2) + POW(f4-%s,2) + 
-        POW(f5-%s,2) + POW(f6-%s,2) + POW(f7-%s,2) + POW(f8-%s,2) + 
-        POW(f9-%s,2) + POW(f10-%s,2) + POW(f11-%s,2) + POW(f12-%s,2) + 
-        POW(f13-%s,2) + POW(f14-%s,2) + POW(f15-%s,2) + POW(f16-%s,2) + 
-        POW(f17-%s,2) + POW(f18-%s,2) + POW(f19-%s,2) + POW(f20-%s,2) + 
-        POW(f21-%s,2) + POW(f22-%s,2) + POW(f23-%s,2) + POW(f24-%s,2) + 
-        POW(f25-%s,2) + POW(f26-%s,2) + POW(f27-%s,2) + POW(f28-%s,2) + 
-        POW(f29-%s,2) + POW(f30-%s,2) + POW(f31-%s,2) + POW(f32-%s,2) + 
-        POW(f33-%s,2) + POW(f34-%s,2) + POW(f35-%s,2) + POW(f36-%s,2) + 
-        POW(f37-%s,2) + POW(f38-%s,2) + POW(f39-%s,2) + POW(f40-%s,2) + 
-        POW(f41-%s,2) + POW(f42-%s,2) + POW(f43-%s,2) + POW(f44-%s,2) + 
-        POW(f45-%s,2) + POW(f46-%s,2) + POW(f47-%s,2) + POW(f48-%s,2) + 
-        POW(f49-%s,2) + POW(f50-%s,2) + POW(f51-%s,2) + POW(f52-%s,2) + 
-        POW(f53-%s,2) + POW(f54-%s,2) + POW(f55-%s,2) + POW(f56-%s,2) + 
-        POW(f57-%s,2) + POW(f58-%s,2) + POW(f59-%s,2) + POW(f60-%s,2) + 
-        POW(f61-%s,2) + POW(f62-%s,2) + POW(f63-%s,2) + POW(f64-%s,2) + 
-        POW(f65-%s,2) + POW(f66-%s,2) + POW(f67-%s,2) + POW(f68-%s,2) + 
-        POW(f69-%s,2) + POW(f70-%s,2) + POW(f71-%s,2) + POW(f72-%s,2) + 
-        POW(f73-%s,2) + POW(f74-%s,2) + POW(f75-%s,2) + POW(f76-%s,2) + 
-        POW(f77-%s,2) + POW(f78-%s,2) + POW(f79-%s,2) + POW(f80-%s,2) + 
-        POW(f81-%s,2) + POW(f82-%s,2) + POW(f83-%s,2) + POW(f84-%s,2) + 
-        POW(f85-%s,2) + POW(f86-%s,2) + POW(f87-%s,2) + POW(f88-%s,2) + 
-        POW(f89-%s,2) + POW(f90-%s,2) + POW(f91-%s,2) + POW(f92-%s,2) + 
-        POW(f93-%s,2) + POW(f94-%s,2) + POW(f95-%s,2) + POW(f96-%s,2) + 
-        POW(f97-%s,2) + POW(f98-%s,2) + POW(f99-%s,2) + POW(f100-%s,2) + 
-        POW(f101-%s,2) + POW(f102-%s,2) + POW(f103-%s,2) + POW(f104-%s,2) + 
-        POW(f105-%s,2) + POW(f106-%s,2) + POW(f107-%s,2) + POW(f108-%s,2) + 
-        POW(f109-%s,2) + POW(f110-%s,2) + POW(f111-%s,2) + POW(f112-%s,2) + 
-        POW(f113-%s,2) + POW(f114-%s,2) + POW(f115-%s,2) + POW(f116-%s,2) + 
-        POW(f117-%s,2) + POW(f118-%s,2) + POW(f119-%s,2) + POW(f120-%s,2) + 
-        POW(f121-%s,2) + POW(f122-%s,2) + POW(f123-%s,2) + POW(f124-%s,2) + 
-        POW(f125-%s,2) + POW(f126-%s,2) + POW(f127-%s,2) + POW(f128-%s,2)
+        POW(tpl001-%s,2) + POW(tpl002-%s,2) + POW(tpl003-%s,2) + POW(tpl004-%s,2) + 
+        POW(tpl005-%s,2) + POW(tpl006-%s,2) + POW(tpl007-%s,2) + POW(tpl008-%s,2) + 
+        POW(tpl009-%s,2) + POW(tpl010-%s,2) + POW(tpl011-%s,2) + POW(tpl012-%s,2) + 
+        POW(tpl013-%s,2) + POW(tpl014-%s,2) + POW(tpl015-%s,2) + POW(tpl016-%s,2) + 
+        POW(tpl017-%s,2) + POW(tpl018-%s,2) + POW(tpl019-%s,2) + POW(tpl020-%s,2) + 
+        POW(tpl021-%s,2) + POW(tpl022-%s,2) + POW(tpl023-%s,2) + POW(tpl024-%s,2) + 
+        POW(tpl025-%s,2) + POW(tpl026-%s,2) + POW(tpl027-%s,2) + POW(tpl028-%s,2) + 
+        POW(tpl029-%s,2) + POW(tpl030-%s,2) + POW(tpl031-%s,2) + POW(tpl032-%s,2) + 
+        POW(tpl033-%s,2) + POW(tpl034-%s,2) + POW(tpl035-%s,2) + POW(tpl036-%s,2) + 
+        POW(tpl037-%s,2) + POW(tpl038-%s,2) + POW(tpl039-%s,2) + POW(tpl040-%s,2) + 
+        POW(tpl041-%s,2) + POW(tpl042-%s,2) + POW(tpl043-%s,2) + POW(tpl044-%s,2) + 
+        POW(tpl045-%s,2) + POW(tpl046-%s,2) + POW(tpl047-%s,2) + POW(tpl048-%s,2) + 
+        POW(tpl049-%s,2) + POW(tpl050-%s,2) + POW(tpl051-%s,2) + POW(tpl052-%s,2) + 
+        POW(tpl053-%s,2) + POW(tpl054-%s,2) + POW(tpl055-%s,2) + POW(tpl056-%s,2) + 
+        POW(tpl057-%s,2) + POW(tpl058-%s,2) + POW(tpl059-%s,2) + POW(tpl060-%s,2) + 
+        POW(tpl061-%s,2) + POW(tpl062-%s,2) + POW(tpl063-%s,2) + POW(tpl064-%s,2) + 
+        POW(tpl065-%s,2) + POW(tpl066-%s,2) + POW(tpl067-%s,2) + POW(tpl068-%s,2) + 
+        POW(tpl069-%s,2) + POW(tpl070-%s,2) + POW(tpl071-%s,2) + POW(tpl072-%s,2) + 
+        POW(tpl073-%s,2) + POW(tpl074-%s,2) + POW(tpl075-%s,2) + POW(tpl076-%s,2) + 
+        POW(tpl077-%s,2) + POW(tpl078-%s,2) + POW(tpl079-%s,2) + POW(tpl080-%s,2) + 
+        POW(tpl081-%s,2) + POW(tpl082-%s,2) + POW(tpl083-%s,2) + POW(tpl084-%s,2) + 
+        POW(tpl085-%s,2) + POW(tpl086-%s,2) + POW(tpl087-%s,2) + POW(tpl088-%s,2) + 
+        POW(tpl089-%s,2) + POW(tpl090-%s,2) + POW(tpl091-%s,2) + POW(tpl092-%s,2) + 
+        POW(tpl093-%s,2) + POW(tpl094-%s,2) + POW(tpl095-%s,2) + POW(tpl096-%s,2) + 
+        POW(tpl097-%s,2) + POW(tpl098-%s,2) + POW(tpl099-%s,2) + POW(tpl100-%s,2) + 
+        POW(tpl101-%s,2) + POW(tpl102-%s,2) + POW(tpl103-%s,2) + POW(tpl104-%s,2) + 
+        POW(tpl105-%s,2) + POW(tpl106-%s,2) + POW(tpl107-%s,2) + POW(tpl108-%s,2) + 
+        POW(tpl109-%s,2) + POW(tpl110-%s,2) + POW(tpl111-%s,2) + POW(tpl112-%s,2) + 
+        POW(tpl113-%s,2) + POW(tpl114-%s,2) + POW(tpl115-%s,2) + POW(tpl116-%s,2) + 
+        POW(tpl117-%s,2) + POW(tpl118-%s,2) + POW(tpl119-%s,2) + POW(tpl120-%s,2) + 
+        POW(tpl121-%s,2) + POW(tpl122-%s,2) + POW(tpl123-%s,2) + POW(tpl124-%s,2) + 
+        POW(tpl125-%s,2) + POW(tpl126-%s,2) + POW(tpl127-%s,2) + POW(tpl128-%s,2) 
         AS square_dist from pessoa_empresa,pessoa,pessoa_template
         where pessoa.id=pessoa_empresa.id_pessoa 
         AND  pessoa.id_pessoa_template = pessoa_template.id AND 
@@ -131,7 +132,8 @@ def verify(data):
     resQuery = conn[1].fetchall()
     if resQuery:
         if resQuery[0][-1] < THRESH:
-            return (resQuery[0],feat,bb,shape)
+            #return (resQuery[0],feat,bb,shape)
+            return (resQuery)
     return 0
     
 
@@ -140,18 +142,32 @@ def lastid(table):
     lastId =  conn[1].fetchone()
     return 1 if lastId is None else  (int(lastId[0])+1)
 
+
 #insere pessoa na base de dados da empresa
 def register(data):
 
     try:
         feat,bb,shape = extractFeatures(data.imageValidate)
     except BaseException:
-       return 
+       return 5009
 
     idPerson = lastid('pessoa')
-    idPersonTemplate = lastid('pessoa_template')
+    conn[1].execute("""insert into pessoa (id) values (%s)""",(idPerson,))
+
+    '''conn[1].execute("""insert into pessoa_atributo (id_pessoa,dt_captura,id_dispositivo,
+        latitude,longitude) values (%s,%s,%s,%s,%s)""",(idPerson,getDatetime,data.captureDeviceCode,
+        data.latitude,data.longitude))'''
+
+    dt = str(time.strftime('%Y-%m-%d %H:%M:%S'))
+    conn[1].execute("""insert into pessoa_empresa (id_empresa,id_pessoa,chave,dt_criou, id_dispositivo,
+        latitude_criou,longitude_criou) values (%s,%s,%s,%s,%s,%s,%s)""", (int(data.companyCode),
+        idPerson,str(data.keyPerson),dt,data.captureDeviceCode,data.latitude, data.longitude))
 
     for i in range(1,129):
+        conn[1].execute("""update pessoa set tpl{:03} = %s where id=%s; """.format(i)
+            %(feat[i-1],idPerson))
+
+    '''for i in range(1,129):
         if i==1:
             conn[1].execute("""insert into pessoa_template (id,f%d) values (%s,%s);"""
                 %(i,idPersonTemplate,feat[i-1]))
@@ -161,44 +177,119 @@ def register(data):
     conn[1].execute("""insert into pessoa (id,id_pessoa_template) values (%s,%s)""",
         (idPerson,idPersonTemplate))
     conn[1].execute("""insert into pessoa_empresa (id_empresa,id_pessoa,chave)
-         values (%s,%s,%s); """,(int(data.companyCode),idPerson,str(data.keyPerson)))
-    conn[0].commit()
+         values (%s,%s,%s); """,(int(data.companyCode),idPerson,str(data.keyPerson)))'''
+
+    #conn[0].commit() #salva alteracoes no bd
+    return 0
 
     #lastId = conn[1].lastrowid #ultimo id consultado pelo conn
 
+#verifica se dispositivo existe na empresa
+def isDevice(data):
+
+    #verifica se deviceCode existe:
+    conn[1].execute('select id from dispositivo') 
+    getData = conn[1].fetchall()
+    if (int(data.captureDeviceCode) not in [x[0] for x in getData]):
+        return 5012
+
+    #verifica se deviceCode pertence ao setor:
+    conn[1].execute("""select dispositivo.id from dispositivo,setor where dispositivo.id=%s and 
+        dispositivo.id_setor = setor.id"""%data.captureDeviceCode) 
+    getData = conn[1].fetchall()
+    if (int(data.captureDeviceCode) not in [x[0] for x in getData]):
+        return 5002 #revisar este codigo de erro
+
+    #verifica se empresa contem setor:
+    conn[1].execute("""select dispositivo.id from dispositivo,setor,empresa where dispositivo.id=%s and 
+        dispositivo.id_setor = setor.id and setor.id_empresa=%s"""%(data.captureDeviceCode,data.companyCode))
+    getData = conn[1].fetchall()
+    if (int(data.captureDeviceCode) not in [x[0] for x in getData]):
+        return 5002 #revisar este codigo de erro
+
+    return 1
+
+def isAppCode(data):
+    if data.appCode in range(1,4):
+        return 1
+    return 0
 
 #cod 1 verifica pessoa na base da empresa, retorna codigo dela
 #cod 2 verifica pessoa na base da empresa, se nao existir CADASTRE
 #cod 3 cadastre pessoa na base da empresa
 
-def main(data):
+def genLog(data):
+    #pessoa.id,companyCode,dataHora,logCode,deviceCode,lat,lon
+    return
+def main(d):
     global conn
     conn = connectDB()
-    result = [] 
-    for d in data:
-       
-        # verifica se empresa esta cadastrada 
-        if not isCustomer(d):
-            result.append(5005) 
-            continue 
+    status = 0
+    result = 0
+    #OBS.: falta validar o codigo do log aqui
 
-        #verifica 1-n na base da empresa
-        if d.appCode == 1:
-            result.append(verify(d))
 
-        #verifica 1-n na base da empresa E cadastra
-        elif d.appCode == 2:
-            verifyPerson =  verify(d)
-            if not verifyPerson:
-                result.append(register(d))
+    # verifica se empresa esta cadastrada 
+    if not isCustomer(d):
+        return 5005 #5002?
+
+    #verifica se dispositivo existe FALTA TESTAR
+    if not isDevice(d):
+        return 5012
+    #verifica cod solicitacao
+    if not isAppCode(d):
+        return  5001
+    
+    if not d.isLongitude():
+        return  5013
+
+    if not d.isLatitude():
+        return 5014
+   
+    #verifica e converte base64 para imagem 
+    #falta testar
+    if d.typeImage == 2:
+        try:
+            d.imageValidate = toImage(d.imageValidate)
+        except:
+            return 5009 
+             
+    #verifica 1-n na base da empresa
+    if d.appCode == 1:
+        result = verify(d)
+        #pessoa nao encontrada 
+        if not result:
+            status = 3
+        else:
+            #imagem incompativel (sem deteccao face)
+            if result > 5000:
+                return result
             else:
-                result.append(verifyPerson)
-
-        #cadastra na base da empresa
-        elif d.appCode == 3:
+                #pessoa encontrada
+                status = 1
+                
+    #verifica 1-n na base da empresa E cadastra
+    elif d.appCode == 2:
+        result =  verify(d)
+        if not result:
             result.append(register(d))
         else:
-            continue
+            result.append(verifyPerson)
+
+    #cadastra na base da empresa
+    elif d.appCode == 3:
+        result = register(d)
+        if not result:
+            status = 6
+        else:
+            return result
+
+    #if result > 5000:
+    #    status = result
+
+    #retorno:
+    #d.requestNumber , status, pessoa.id (senao retorna '999999999'
+
     conn[1].close()
     conn[0].close()
     return result 
