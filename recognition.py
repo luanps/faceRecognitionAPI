@@ -20,11 +20,16 @@ facerec = dlib.face_recognition_model_v1(face_rec)
 THRESH = .2#0.1 #0.5
 
 def toBase64(f):
-    return  base64.b64encode(f) 
+    retval, b64 = cv2.imencode('.jpg', f)
+    return  base64.b64encode(b64) 
 
-def toImage(f): 
-    dec = np.fromstring(codecs.decode(f,'base64'), np.uint8)
-    return cv2.imdecode(dec, cv2.IMREAD_ANYCOLOR)
+def toImage(f):
+    b64 = base64.b64decode(f[1:-1])
+    b64 = np.frombuffer(b64,dtype = np.uint8)
+    img = cv2.imdecode(b64,flags=1)
+    return img
+    #dec = np.fromstring(codecs.decode(f,'base64'), np.uint8)
+    #return cv2.imdecode(dec, cv2.IMREAD_ANYCOLOR)
 
 def connectDB():
     cnx = mysql.connector.connect(user='root',
@@ -228,6 +233,22 @@ def genLog(data):
     conn[0].commit() #salva alteracoes no bd
     return
 
+def isLatitude(data):
+    try:
+        if data.latitude < 90 and data.latitude > -90:
+            return 0
+    except:
+        return 1
+    return 1
+
+def isLongitude(data):
+    try:
+        if data.longitude < 180 and data.longitude > -180:
+            return 0
+    except:
+        return 1
+    return 1
+
 #cod 1 verifica pessoa na base da empresa, retorna codigo dela
 #cod 2 verifica pessoa na base da empresa, se nao existir CADASTRE
 #cod 3 cadastre pessoa na base da empresa
@@ -249,17 +270,18 @@ def runRecognition(d):
     if not isAppCode(d):
         return  5001,-1
     
-    if not d.isLongitude():
+    if isLongitude(d):
         return  5013,-1
 
-    if not d.isLatitude():
+    if isLatitude(d):
         return 5014,-1
    
     #verifica e converte base64 para imagem 
     #falta testar
     if d.typeImage == 2:
         try:
-            d.imageValidate = toImage(d.imageValidate)
+            d.imageValidate = toImage(d.imageValidate)  
+            
         except:
             return 5009,-1
              
