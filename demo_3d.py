@@ -9,20 +9,23 @@ import pyrealsense as pyrs
 from pyrealsense.constants import rs_option
 import pdb
 from request import Request
+from client import  requestService
 from recognition import main
 from sklearn.preprocessing import normalize
-NUMFRAMES = 10
+#from tkinter import Tk
+#from gui import Gui
+NUMFRAMES = 5
 
-parse = argparse.ArgumentParser()
+'''parse = argparse.ArgumentParser()
 parse.add_argument('empresa',type=int,
     help='1 - Dev | 2- ABL | 3-Detran')
 parse.add_argument('depth',type=int,
-    help='0: 2D | 1:3D')
+    help='0: 2D | 1:3D')'''
 '''parse.add_argument('modo',type=str,
     help='C - cadastro | V - verificação')
 parse.add_argument('-chave',type=str,
-    help='-chave : chave de cadastro ex: nome, cpf')'''
-args = parse.parse_args()
+    help='-chave : chave de cadastro ex: nome, cpf')
+args = parse.parse_args()'''
 
 def convert_z16_to_bgr(frame):
     #Performs depth histogram normalization
@@ -104,17 +107,18 @@ def if3dFace(depth,ir,bb):
 
 
 with pyrs.Service() as serv:
+
     with serv.Device() as dev:
 
         dev.apply_ivcam_preset(0)
         
         try:  # set custom gain/exposure values to obtain good depth image
-            '''custom_options = [(rs_option.RS_OPTION_R200_LR_EXPOSURE, 30.0),
+            custom_options = [(rs_option.RS_OPTION_R200_LR_EXPOSURE, 30.0),
                               (rs_option.RS_OPTION_R200_LR_GAIN, 100.0),
-                              (rs_option.RS_OPTION_F200_LASER_POWER, 12)]'''
+                              (rs_option.RS_OPTION_F200_LASER_POWER, 12)]
 
             #novas configs - desabilitado
-            custom_options = [(rs_option.RS_OPTION_COLOR_BACKLIGHT_COMPENSATION,1),
+            custom_opt = [(rs_option.RS_OPTION_COLOR_BACKLIGHT_COMPENSATION,1),
                 (rs_option.RS_OPTION_COLOR_BRIGHTNESS,55),
                 (rs_option.RS_OPTION_COLOR_CONTRAST, 32),
                 (rs_option.RS_OPTION_COLOR_ENABLE_AUTO_EXPOSURE,167),
@@ -150,30 +154,30 @@ with pyrs.Service() as serv:
                 cv2.rectangle(c,(bb[0],bb[1]),(bb[2],bb[3]),(0,200,0),2) 
                 cv2.putText(c,'%s'%chave,(bb[0],bb[1]),cv2.FONT_HERSHEY_DUPLEX,2,(100,200,0),2)
 
-            if args.depth:
-                d = dev.depth# * dev.depth_scale * 1000
-                pc = dev.pointcloud 
-                d = convert_z16_to_bgr(d)
-                
-                
-                #d = cv2.applyColorMap(d.astype(np.uint8), cv2.COLORMAP_RAINBOW)
-                if bb:
-                    try:
-                        is3d,b = if3dFace(pc,i,bb)
-                        if is3d:
-                            cv2.rectangle(d,(b[0],b[1]),(b[2],b[3]),(0,200,0),2) 
-                            cv2.putText(d,'%s'%chave,(b[0],b[1]),cv2.FONT_HERSHEY_DUPLEX,2,(100,200,0),2)
-    
-                    except:
-                        pass
-                        
-                i = dev.infrared
-                i = i.reshape(i.shape[0],i.shape[1],1)
-                i = cv2.cvtColor(i.astype(np.uint8),cv2.COLOR_GRAY2BGR)
-                cd = np.concatenate((c, d, i), axis=1)
-                cv2.imshow('', cd)
-            else:
-                cv2.imshow('', c)
+            #if args.depth:
+            d = dev.depth# * dev.depth_scale * 1000
+            pc = dev.pointcloud 
+            d = convert_z16_to_bgr(d)
+            
+            
+            #d = cv2.applyColorMap(d.astype(np.uint8), cv2.COLORMAP_RAINBOW)
+            if bb:
+                try:
+                    is3d,b = if3dFace(pc,i,bb)
+                    if is3d:
+                        cv2.rectangle(d,(b[0],b[1]),(b[2],b[3]),(0,200,0),2) 
+                        cv2.putText(d,'%s'%chave,(b[0],b[1]),cv2.FONT_HERSHEY_DUPLEX,2,(100,200,0),2)
+
+                except:
+                    pass
+                    
+            i = dev.infrared
+            i = i.reshape(i.shape[0],i.shape[1],1)
+            i = cv2.cvtColor(i.astype(np.uint8),cv2.COLOR_GRAY2BGR)
+            cd = np.concatenate((c, d, i), axis=1)
+            cv2.imshow('', cd)
+            #else:
+            #    cv2.imshow('', c)
 
             cnt += 1
             if (cnt % NUMFRAMES) == 0 and cnt >50:
@@ -183,13 +187,15 @@ with pyrs.Service() as serv:
                 fps_smooth = (fps_smooth * smoothing) + (fps * (1.0-smoothing))
                 last = now
                 bb=0
-                identify = main([Request('00000%d-imgWebcam-0001'%args.empresa,
-                    c,1)])
-                try:
+                identify = requestService('000003-imgWebcam-0001-1-1111-11111.jpg',c,1,1)
+                print(main(identify))
+                #identify = main([Request('00000%d-imgWebcam-0001-1-1111-11111.jpg'%args.empresa,
+                #    c,1)])
+                '''try:
                     chave = identify[0][0][0]
                     bb = identify[0][2]
                 except:
-                    pass
+                    pass'''
 
             
             #c = cv2.rectangle(c,(100,100),(250,250),(0,200,0),2)
