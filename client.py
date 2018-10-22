@@ -50,13 +50,13 @@ def requestService(imgName,img,appCode,imgType):
 
 def readImage(path,f,imgType):
     data = []
-    for i in listdir(path):
-
+    for cnt,i in enumerate(listdir(path)):
+        #if cnt>320: #XUNXO PULA N PRIMEiROS
         if imgType == 1:
             img = cv2.imread(abspath(path)+'/'+i) 
         else:
             img = open(abspath(path)+'/'+i,'rb').read()
-
+        
         data.append(requestService(i,img,f,imgType))
         #data.append(Request(i,img,f,1))
     return data
@@ -64,22 +64,18 @@ def readImage(path,f,imgType):
 parse = argparse.ArgumentParser()
 #parse.add_argument('modo',type=str,default='S',
 #    help='S = Sobrepoe template') 
-parse.add_argument('dir',type=str,
+parse.add_argument('-dir',type=str,default='0',
     help= 'diretorio das imagens')
-parse.add_argument('tipo',type=int, 
+parse.add_argument('-tipo',type=int,default='1',
     help= 'tipo = tipo de arquivo: 1-imagem | 2-base64')
-parse.add_argument('funcao',type=int, 
+parse.add_argument('-funcao',type=int,default='1', 
     help= 'funcao a ser executada: 1-verifica pessoa, 2-verifica e cadastra novos, 3-cadastra todos')
 args = parse.parse_args()
 
-data = readImage(args.dir,args.funcao,args.tipo)
+data = readImage(args.dir,args.tipo,args.funcao)
 '''if (args.t ==1):
     data = readImage(args.dir,args.funcao)
 else:
     data = readBase64(args.dir,args.funcao)'''
-result = []
 for i in data:
-    result.append(main(i))
-
-for i in result:
-    print(i)
+    main(i)
