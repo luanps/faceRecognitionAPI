@@ -24,7 +24,8 @@ def toBase64(f):
     return  base64.b64encode(b64) 
 
 def toImage(f):
-    b64 = base64.b64decode(f[1:-1])
+    #b64 = base64.b64decode(f[1:-1])
+    b64 = base64.b64decode(f)
     b64 = np.frombuffer(b64,dtype = np.uint8)
     img = cv2.imdecode(b64,flags=1)
     return img
@@ -33,7 +34,7 @@ def toImage(f):
 
 def connectDB():
     cnx = mysql.connector.connect(user='root',
-        password='mimago',host='localhost',database='imc')
+        password='rapadura',host='localhost',database='imc')
     cursor = cnx.cursor(buffered=True)
     return [cnx,cursor] 
 
@@ -219,7 +220,7 @@ def isDevice(data):
     return 0
 
 def isAppCode(data):
-    if data.appCode in range(1,4):
+    if int(data.appCode) in range(1,4):
         return 1
     return 0
 
@@ -235,7 +236,7 @@ def genLog(data):
 
 def isLatitude(data):
     try:
-        if data.latitude < 90 and data.latitude > -90:
+        if float(data.latitude) < 90 and float(data.latitude) > -90:
             return 0
     except:
         return 1
@@ -243,7 +244,7 @@ def isLatitude(data):
 
 def isLongitude(data):
     try:
-        if data.longitude < 180 and data.longitude > -180:
+        if float(data.longitude) < 180 and float(data.longitude) > -180:
             return 0
     except:
         return 1
@@ -278,7 +279,7 @@ def runRecognition(d):
    
     #verifica e converte base64 para imagem 
     #falta testar
-    if d.typeImage == 2:
+    if int(d.typeImage) == 2:
         try:
             d.imageValidate = toImage(d.imageValidate)  
             
@@ -286,7 +287,7 @@ def runRecognition(d):
             return 5009,-1
              
     #verifica 1-n na base da empresa
-    if d.appCode == 1:
+    if int(d.appCode) == 1:
 
         resultQuery = verify(d)
         #imagem incompativel (sem deteccao face)
