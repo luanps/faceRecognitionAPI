@@ -1,0 +1,9 @@
+data[1] = 'Pessoa encontrada'
+data[3] = 'Pessoa nao encontrada'
+data[6] = 'Pessoa inserida no banco de dados'
+data[5001] = 'Codigo da solicitacao invalido'
+data[5005] = 'Empresa nao cadastrada'
+data[5009] = 'Imagem incompativel'
+data[5013] = 'Longitude invalida'
+data[5014] = 'Latitude invalida'
+
