@@ -25,6 +25,10 @@ def toBase64(f):
 
 def toImage(f):
     #b64 = base64.b64decode(f[1:-1])
+
+    if ',' in f:
+        f = f.split(',')[-1]
+        
     b64 = base64.b64decode(f)
     b64 = np.frombuffer(b64,dtype = np.uint8)
     img = cv2.imdecode(b64,flags=1)
