@@ -145,7 +145,8 @@ def verify(data):
         if resQuery[0][-1] < THRESH:
             #return (resQuery[0],feat,bb,shape)
             data.idPerson = resQuery[0][1] 
-            return (data.idPerson) #retorna pessoa.id 
+            #return (data.idPerson,resQuery[0][0]) #retorna pessoa.id e chave
+            return (resQuery[0][0]) #retorna pessoa.id e chave
 
     #pessoa nao encontrada
     return 0
@@ -233,8 +234,10 @@ def isAppCode(data):
 def genLog(data):
     dt = str(time.strftime('%Y-%m-%d %H:%M:%S'))
     img = toBase64(data.imageValidate)
-    conn[1].execute("""insert into pessoa_log (id_pessoa,dt_log,id_dispositivo,latitude,longitude,foto)
-         values (%s,%s,%s,%s,%s,%s)""",(data.idPerson,dt,data.captureDeviceCode,data.latitude,data.longitude,img))
+#conn[1].execute("""insert into pessoa_log (id_pessoa,dt_log,id_dispositivo,latitude,longitude,foto)
+#         values (%s,%s,%s,%s,%s,%s)""",(data.idPerson,dt,data.captureDeviceCode,data.latitude,data.longitude,img))
+    conn[1].execute("""insert into pessoa_log (id_pessoa,dt_log,id_dispositivo,latitude,longitude)
+         values (%s,%s,%s,%s,%s)""",(data.idPerson,dt,data.captureDeviceCode,data.latitude,data.longitude))
     conn[0].commit() #salva alteracoes no bd
     return
 
@@ -305,7 +308,7 @@ def runRecognition(d):
             status = 1
 
     #verifica 1-n na base da empresa E cadastra
-    elif d.appCode == 2:
+    elif int(d.appCode) == 2:
 
         resultQuery =  verify(d)
         #imagem incompativel (sem deteccao face)
@@ -324,26 +327,27 @@ def runRecognition(d):
             status = 1
 
     #cadastra na base da empresa
-    elif d.appCode == 3:
+    elif int(d.appCode) == 3:
         resultQuery = register(d)
         if resultQuery == -1:
             return 5009,-1
         status = 6
 
     #insere na tabela pessoa_log se cadastro for realizado ou pessoa encontrada 
-    if status < 5000 and resultQuery>0:
+    if status < 5000 and resultQuery!=0 and resultQuery!=-1:
         genLog(d)
-
     return ([status,resultQuery]) 
 
 def main(data):
     global conn
     conn = connectDB()
     status = runRecognition(data)
-    if len(status)>1 and status[1]>0:
-        jsFile = json.dumps(Return(data.requestNumber,status[0],status[1]).__dict__)
+    if len(status)>1 and status[1]!=0 and status[1]!=-1:
+        jsFile = json.dumps(Return(data.requestNumber,
+                status[0],status[1],data.keyPerson).__dict__)
     else:
-        jsFile = json.dumps(Return(data.requestNumber,status[0],999999999).__dict__)
+        jsFile = json.dumps(Return(data.requestNumber,status[0],
+                999999999,data.keyPerson).__dict__)
     #d.requestNumber , status, pessoa.id (senao retorna '999999999'
     conn[1].close()
     conn[0].close()
