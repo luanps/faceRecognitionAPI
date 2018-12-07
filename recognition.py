@@ -38,7 +38,7 @@ def toImage(f):
 
 def connectDB():
     cnx = mysql.connector.connect(user='root',
-        password='rapadura',host='localhost',database='imc')
+        password='123456',host='localhost',database='db')
     cursor = cnx.cursor(buffered=True)
     return [cnx,cursor] 
 
