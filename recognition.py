@@ -1,4 +1,5 @@
-import pdb
+'''Recognition functions - Server side
+'''
 import cv2
 import dlib
 import sys
@@ -12,17 +13,23 @@ import codecs
 import time
 import json
 from returnFile import Return
+
+#instantiate face detector,alignment and recogntion from Dlib
 predictor = 'model2.dat'
 face_rec = 'model1.dat'
 detector = dlib.get_frontal_face_detector()
 sp = dlib.shape_predictor(predictor)
 facerec = dlib.face_recognition_model_v1(face_rec)
+
+#Define a recogntion threshold
 THRESH = .2#0.1 #0.5
 
+#Convert RGB image to Base64
 def toBase64(f):
     retval, b64 = cv2.imencode('.jpg', f)
     return  base64.b64encode(b64) 
 
+#Convert base64 image to RGB
 def toImage(f):
     #b64 = base64.b64decode(f[1:-1])
 
@@ -36,21 +43,15 @@ def toImage(f):
     #dec = np.fromstring(codecs.decode(f,'base64'), np.uint8)
     #return cv2.imdecode(dec, cv2.IMREAD_ANYCOLOR)
 
+#Connect to database
 def connectDB():
     cnx = mysql.connector.connect(user='root',
         password='123456',host='localhost',database='db')
     cursor = cnx.cursor(buffered=True)
     return [cnx,cursor] 
 
-#verifica se empresa esta cadastrada
-def isCustomer(data):
-    conn[1].execute("select id from empresa;")
-    idCompany = conn[1].fetchall()
-    if (int(data.companyCode) in [x[0] for x in idCompany]):
-        return 1
-    return 0
 
-
+#Face detection, alignment and feature extraction
 #detecta face e extrai vetor de caracteristicas
 def extractFeatures(image):
     dets = detector(image, 1)
@@ -62,6 +63,17 @@ def extractFeatures(image):
     #face_crop = img[d.top():d.bottom(),d.left():d.right()]
     return (np.asarray(feat),bb,shape)
 
+
+#Verify if Company is registered on the database by companyCode
+#verifica se empresa esta cadastrada
+def isCustomer(data):
+    conn[1].execute("select id from empresa;")
+    idCompany = conn[1].fetchall()
+    if (int(data.companyCode) in [x[0] for x in idCompany]):
+        return 1
+    return 0
+
+#1:n face recognition query on the database, comparing its 128-dim facial features
 #consulta 1 para n na base de dados
 def verify(data):
     try:
@@ -147,17 +159,16 @@ def verify(data):
             data.idPerson = resQuery[0][1] 
             #return (data.idPerson,resQuery[0][0]) #retorna pessoa.id e chave
             return (resQuery[0][0]) #retorna pessoa.id e chave
-
-    #pessoa nao encontrada
+    #pessoa nao encontrada - not found on the database
     return 0
     
-
+#Get the last ID registered on the database table
 def lastid(table):
     conn[1].execute('select id from %s order by id desc limit 1'%table)
     lastId =  conn[1].fetchone()
     return 1 if lastId is None else  (int(lastId[0])+1)
 
-
+#insert a new person on Company's database
 #insere pessoa na base de dados da empresa
 def register(data):
 
@@ -194,28 +205,29 @@ def register(data):
     conn[1].execute("""insert into pessoa_empresa (id_empresa,id_pessoa,chave)
          values (%s,%s,%s); """,(int(data.companyCode),idPerson,str(data.keyPerson)))'''
 
-    conn[0].commit() #salva alteracoes no bd
+    conn[0].commit() #salva alteracoes no bd - save updates on database
     return data.idPerson
 
     #lastId = conn[1].lastrowid #ultimo id consultado pelo conn
 
+#check if Device exists on given Company
 #verifica se dispositivo existe na empresa
 def isDevice(data):
-
-    #verifica se deviceCode existe:
+    
+    #check if deviceCode exists:
     conn[1].execute('select id from dispositivo') 
     getData = conn[1].fetchall()
     if (int(data.captureDeviceCode) not in [x[0] for x in getData]):
         return 5012
-
-    #verifica se deviceCode pertence ao setor:
+    
+    #check if deviceCode belongs to a sector
     conn[1].execute("""select dispositivo.id from dispositivo,setor where dispositivo.id=%s and 
         dispositivo.id_setor = setor.id"""%data.captureDeviceCode) 
     getData = conn[1].fetchall()
     if (int(data.captureDeviceCode) not in [x[0] for x in getData]):
         return 5002 #revisar este codigo de erro
 
-    #verifica se empresa contem setor:
+    #check if sector belongs to company:
     conn[1].execute("""select dispositivo.id from dispositivo,setor,empresa where dispositivo.id=%s and 
         dispositivo.id_setor = setor.id and setor.id_empresa=%s"""%(data.captureDeviceCode,data.companyCode))
     getData = conn[1].fetchall()
@@ -224,23 +236,24 @@ def isDevice(data):
 
     return 0
 
+#check if request code is valid (need to be an option between 1 and 4)
 def isAppCode(data):
     if int(data.appCode) in range(1,4):
         return 1
     return 0
 
-
-#insere dados na tabela pessoa_log
+#insert data on pessoa_log table
 def genLog(data):
     dt = str(time.strftime('%Y-%m-%d %H:%M:%S'))
     img = toBase64(data.imageValidate)
-#conn[1].execute("""insert into pessoa_log (id_pessoa,dt_log,id_dispositivo,latitude,longitude,foto)
-#         values (%s,%s,%s,%s,%s,%s)""",(data.idPerson,dt,data.captureDeviceCode,data.latitude,data.longitude,img))
+    #conn[1].execute("""insert into pessoa_log (id_pessoa,dt_log,id_dispositivo,latitude,longitude,foto)
+    #         values (%s,%s,%s,%s,%s,%s)""",(data.idPerson,dt,data.captureDeviceCode,data.latitude,data.longitude,img))
     conn[1].execute("""insert into pessoa_log (id_pessoa,dt_log,id_dispositivo,latitude,longitude)
          values (%s,%s,%s,%s,%s)""",(data.idPerson,dt,data.captureDeviceCode,data.latitude,data.longitude))
     conn[0].commit() #salva alteracoes no bd
     return
 
+#Check if latitute format is correct
 def isLatitude(data):
     try:
         if float(data.latitude) < 90 and float(data.latitude) > -90:
@@ -249,6 +262,7 @@ def isLatitude(data):
         return 1
     return 1
 
+#Check if longitude format is correct
 def isLongitude(data):
     try:
         if float(data.longitude) < 180 and float(data.longitude) > -180:
@@ -265,16 +279,14 @@ def runRecognition(d):
     status = 0
     #OBS.: falta validar o codigo do log aqui
 
-
-    # verifica se empresa esta cadastrada 
     if not isCustomer(d):
         return 5005,-1 #5002?
+
     #verifica se dispositivo existe FALTA TESTAR
-    
     device = isDevice(d)
     if device:
         return device,-1
-    #verifica cod solicitacao
+
     if not isAppCode(d):
         return  5001,-1
     
@@ -292,37 +304,37 @@ def runRecognition(d):
             
         except:
             return 5009,-1
-             
-    #verifica 1-n na base da empresa
+            
+    #1:n face verification on company's database
     if int(d.appCode) == 1:
 
         resultQuery = verify(d)
-        #imagem incompativel (sem deteccao face)
+        #face detection failed, return incompatible image error
         if resultQuery ==-1:
             return 5009,-1
-        #pessoa nao encontrada 
+        #person not found
         if not resultQuery:
             status = 3
         else:
-            #pessoa encontrada
+            #person found
             status = 1
 
-    #verifica 1-n na base da empresa E cadastra
+    #1:n face verification on company's databse AND register it if not encountered
     elif int(d.appCode) == 2:
 
         resultQuery =  verify(d)
-        #imagem incompativel (sem deteccao face)
+        #face detection failed, return incompatible image error
         if resultQuery == -1:
             return 5009,-1
-        #pessoa nao encontrada 
+        #person not found
         if not resultQuery:
-            #insere no bd
+            #insert person on database
             resultQuery = register(d)
             if resultQuery == -1:
                 return 5009,-1
             status = 6
 
-        #pessoa encontrada, nao insere
+        #person not found, do not insert it to databse
         else:
             status = 1
 
@@ -338,6 +350,8 @@ def runRecognition(d):
         genLog(d)
     return ([status,resultQuery]) 
 
+#main function, receives a JSON data, unpack it and run recognition functions
+# it returns a JSON output file
 def main(data):
     global conn
     conn = connectDB()

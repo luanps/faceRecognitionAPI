@@ -1,3 +1,6 @@
+'''Server built using Flask microservice
+Keep it running in order to listen for a request
+'''
 from flask import Flask,request,jsonify
 import json
 from recognition import main
@@ -6,7 +9,7 @@ from collections import namedtuple
 from recordtype import recordtype
 logging.basicConfig(level=logging.DEBUG)
 app = Flask(__name__)
-import pdb
+
 @app.route('/', methods = ['GET','POST'])
 def getRequest():
     data = request.get_json()
