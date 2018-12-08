@@ -4,8 +4,7 @@ in the same database.
 The face descriptor network were obtained from [Dlib](http://dlib.net)[1].
 The server uses Flask microframework, and MySQL is used as a database.
 
-Once the server ```server.py```  
-is online, it waits  a JSON post [with this attributes](https://github.com/luanps/faceRecognitionAPI/blob/49ebd3387ef947a9ba6987a31f553b1885be8cc5/client.py#L14-L40), and parses it to the ```recognition.py``` main function.
+Once the server ```server.py``` is online, it waits  a JSON post with [this attributes](https://github.com/luanps/faceRecognitionAPI/blob/49ebd3387ef947a9ba6987a31f553b1885be8cc5/client.py#L14-L40), and parses it to the ```recognition.py``` main function.
 
 The recognition function is responsible for making queries on the database, returning a JSON with error/success codes.
 
@@ -18,7 +17,7 @@ Alternatively, we made a client script for easily understanding. In this example
 
 The demo_2d.py, demo_3d.py and demo_onclick.py scripts are used for local tests.
 
-Note that the code in this repository  won't work without the database, which is not
+Note that the code in this repository  **won't work without the database**, which is not
 publicly available.
 
 
@@ -34,7 +33,8 @@ The requirements are listed  on requirements.txt
 
 - [Face alignment](http://dlib.net/files/shape_predictor_5_face_landmarks.dat.bz2)
 - [Face descriptor](http://dlib.net/files/dlib_face_recognition_resnet_model_v1.dat.bz2)
-and rename to model1.dat(face descriptor) and model2.dat(face aligment)
+
+and rename them to model1.dat (face descriptor) and model2.dat (face aligment)
 
 **References:**
 
