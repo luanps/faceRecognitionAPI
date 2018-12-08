@@ -1,3 +1,6 @@
+'''
+Client side tests for continuos authentication on webcam video
+'''
 import cv2
 import sys
 import argparse

@@ -1,9 +1,11 @@
-data[1] = 'Pessoa encontrada'
-data[3] = 'Pessoa nao encontrada'
-data[6] = 'Pessoa inserida no banco de dados'
-data[5001] = 'Codigo da solicitacao invalido'
-data[5005] = 'Empresa nao cadastrada'
-data[5009] = 'Imagem incompativel'
-data[5013] = 'Longitude invalida'
-data[5014] = 'Latitude invalida'
+'''Recognition return codes 
+'''
+data[1] = 'Pessoa encontrada' #person was found on the db
+data[3] = 'Pessoa nao encontrada' #person was not found on the db
+data[6] = 'Pessoa inserida no banco de dados' #person inserted on the db
+data[5001] = 'Codigo da solicitacao invalido' #request code invalid
+data[5005] = 'Empresa nao cadastrada' #company do not registered on the db
+data[5009] = 'Imagem incompativel' #incompatible image
+data[5013] = 'Longitude invalida' #invalid longitude
+data[5014] = 'Latitude invalida' #invalid latitude
 

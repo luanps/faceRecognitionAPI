@@ -1,3 +1,7 @@
+'''
+Client side tests for authentication when a button is pressed
+'''
+
 import cv2
 import sys
 import argparse

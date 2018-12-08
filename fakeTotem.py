@@ -1,3 +1,7 @@
+'''
+Client side example:
+Captures a user's image from webcam and makes an example query on server.
+'''
 import cv2
 import sys
 import argparse
@@ -28,6 +32,7 @@ count = 0
 bb=0
 
 print('Pressione "espaco" para tirar foto e comparar com banco de dados, pressiona "q" para sair\n')
+print('Press "space" to take a picture from webcam and make a comparison with the database. Press "q" to exit\n')
  
 while cap.isOpened():
     ret,frame = cap.read()

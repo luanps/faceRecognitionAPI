@@ -1,4 +1,6 @@
-'''Recognition functions - Server side
+'''Recognition functions - Server side.
+The face detection, alignment and recognition models are obtained
+from dlib.net
 '''
 import cv2
 import dlib

@@ -1,3 +1,6 @@
+'''
+Request attributes used for unpacking JSON query
+'''
 import sys
 import argparse
 from os import listdir
@@ -11,7 +14,7 @@ class Request:
         self.companyCode = company
         self.logCode = log
         self.captureDeviceCode = device
-
+        
         #tipo de solicitacao
         self.appCode = app 
 
@@ -36,7 +39,7 @@ class Request:
         self.idPerson = None
 
     #def getData(imageName):
-
+    #not in use
     def isLatitude(self):
         try:
             if self.latitude < 90 and self.latitude> -90:
@@ -44,6 +47,7 @@ class Request:
         except:
             return 0
 
+    #not in use
     def isLongitude(self):
         try:
             if self.longitude < 180 and self.longitude > -180:

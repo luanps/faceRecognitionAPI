@@ -1,3 +1,6 @@
+'''
+Read images from folder and creates a batch of requests.
+'''
 import sys
 import argparse
 from os import listdir
@@ -10,7 +13,7 @@ import codecs
 import numpy as np
 import random
 
-#cria solicitacao de servico para a imagem passada como parametro e demais dados de exemplo:
+#creates a request service given an image
 def requestService(imgName,img,appCode,imgType): 
 
     #request number random
@@ -18,22 +21,24 @@ def requestService(imgName,img,appCode,imgType):
     #log number random
     log = random.randint(1,1000000)
 
-    #device de testes = 123 (insere empresa 1 )
-    #device de testes DETRAN = 1 (insere empresa 3)
+    #test device  = 123 (insere empresa 1 )
+    #test device  DETRAN = 1 (insere empresa 3)
     device = 1
 
-    #coordenadas imago
+    # our coordinates as test
     lat = -25.450 
     lon = -49.231 
-    #dados nome da imagem
+
+    #image name data
     company,keyPerson,seqPerson = imgName.split('-')[:3]
-    #atributo
+
+    #attibutes 
     attr = 0
-    #imagem verdadeira default=99
+    #true image default=99
     trueImage = 99
-    #point cloud verdadeiro default=99
+    #true point cloud default=99
     truePC = 99
-    #point cloud validar default=99
+    #point cloud to be validated default=99
     pc = 99
 
     return(Request(rn,company,log,device,appCode,lat,lon,keyPerson,attr,
@@ -48,10 +53,10 @@ def requestService(imgName,img,appCode,imgType):
         data.append(Request(i,img,f,imgType))
     return data'''
 
+# read images from file
 def readImage(path,f,imgType):
     data = []
     for cnt,i in enumerate(listdir(path)):
-        #if cnt>320: #XUNXO PULA N PRIMEiROS
         if imgType == 1:
             img = cv2.imread(abspath(path)+'/'+i) 
         else:
@@ -65,11 +70,11 @@ parse = argparse.ArgumentParser()
 #parse.add_argument('modo',type=str,default='S',
 #    help='S = Sobrepoe template') 
 parse.add_argument('-dir',type=str,default='0',
-    help= 'diretorio das imagens')
+    help= 'image folder')
 parse.add_argument('-tipo',type=int,default='1',
-    help= 'tipo = tipo de arquivo: 1-imagem | 2-base64')
+    help= 'tipo = file type: 1-image | 2-base64')
 parse.add_argument('-funcao',type=int,default='1', 
-    help= 'funcao a ser executada: 1-verifica pessoa, 2-verifica e cadastra novos, 3-cadastra todos')
+    help= 'functions available: 1-veriry person, 2-verify AND register, 3-register all')
 args = parse.parse_args()
 
 data = readImage(args.dir,args.tipo,args.funcao)
