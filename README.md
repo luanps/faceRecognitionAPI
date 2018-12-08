@@ -1,20 +1,24 @@
 
-This is a Face Recognition API is based on [Dlib](http://dlib.net)[1].
-It consists on a client-server recognition pipeline, storing the face descriptors and its attributes on a database.
+This is a client-server Face Recognition API, able to maintain multiple data from different companies 
+in the same database.
+The face descriptor network were obtained from [Dlib](http://dlib.net)[1].
+The server uses Flask microframework, and MySQL is used as a database.
 
-The client side reads a single face image from webcam, using:
-'''
+Once the server ```server.py```  
+is online, it waits  a JSON post [with this attributes](https://github.com/luanps/faceRecognitionAPI/blob/49ebd3387ef947a9ba6987a31f553b1885be8cc5/client.py#L14-L40), and parses it to the ```recognition.py``` main function.
+
+The recognition function is responsible for making queries on the database, returning a JSON with error/success codes.
+
+The client side can POST a JSON directly to the server.
+Alternatively, we made a client script for easily understanding. In this example,
+ a face image is obtained from the webcam, using:
+```
  python3 fakeTotem.py
-'''
-and makes a request to the server, which can be a new register insertion or
-a face matching.
+```
 
-The server side gets a [Request](https://github.com/luanps/faceRecognitionAPI/blob/7b87e39677601c9d9fb6d522b0b5e5080964fc7d/request.py#L7) JSON and make a face identification query on the database.
+The demo_2d.py, demo_3d.py and demo_onclick.py scripts are used for local tests.
 
-
-The demo_2d.py, demo_3d.py and demo_onclick.py scripts are used for local test.
-
-Note that this code won't work without the database, which is not
+Note that the code in this repository  won't work without the database, which is not
 publicly available.
 
 
@@ -23,16 +27,8 @@ The model has been trained on a dataset with 3 million faces
 More details about Dlib face analisys pipeline can be obtained
 [here](https://github.com/davisking/dlib-models).
 
-**Basic Requirements:**
 
-- python3
-- dlib
-- numpy
-- cv2 (opencv)
-- python3-tk
-- Pillow
-- _pickle
-- skimage
+The requirements are listed  on requirements.txt
 
 **Download Dlib trained models from:**
 
